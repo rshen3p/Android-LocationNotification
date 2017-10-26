@@ -3,6 +3,8 @@ package ricky.chen.bcit.ca.landmarknotifier;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
@@ -11,6 +13,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -26,6 +30,9 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.io.IOException;
+import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks
         , GoogleApiClient.OnConnectionFailedListener, LocationListener {
@@ -150,7 +157,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    public void click(View v){
+        EditText tf_location = (EditText)findViewById(R.id.TF_location);
+        String location = tf_location.getText().toString();
+        List<Address> addressList = null;
+        MarkerOptions mo = new MarkerOptions();
 
+        if( !location.equals("")) {
+            Geocoder geocoder = new Geocoder(this);
+            try {
+                addressList = geocoder.getFromLocationName(location,5);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            for(int i= 0; i<addressList.size();i++){
+                Address myAdress = addressList.get(i);
+                LatLng latLng = new LatLng(myAdress.getLatitude(),myAdress.getLongitude());
+                mo.position(latLng);
+                mo.title("Your search result");
+                mMap.addMarker(mo);
+                mMap.animateCamera((CameraUpdateFactory.newLatLng(latLng)));
+            }
+        }
+    }
 
     @Override
     public void onConnectionSuspended(int i) {
