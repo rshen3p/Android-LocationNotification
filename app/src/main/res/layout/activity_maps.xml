@@ -2,18 +2,6 @@
     android:layout_width="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:map="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/map"
-    android:name="com.google.android.gms.maps.SupportMapFragment"
-    android:layout_width="match_parent"
-    android:layout_height="450dp"
-    tools:context="ricky.chen.bcit.ca.landmarknotifier.MapsActivity"
-    android:layout_alignParentBottom="true"
-    android:layout_alignParentStart="true"
-    android:layout_below="@+id/TF_location" />
-
     <EditText
         android:id="@+id/TF_location"
         android:layout_width="300dp"
@@ -27,10 +15,51 @@
         android:id="@+id/B_search"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="click"
+        android:onClick="onClick"
         android:text="Search"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         android:layout_alignBottom="@+id/TF_location" />
+
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:map="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="480dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true"
+        tools:context="ricky.chen.bcit.ca.landmarknotifier.MapsActivity" />
+
+    <Button
+        android:id="@+id/B_hospital"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/map"
+        android:layout_alignParentStart="true"
+        android:onClick="onClick"
+        android:text="Hostpitals" />
+
+    <Button
+        android:id="@+id/B_resturant"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/B_hospital"
+        android:layout_alignBottom="@+id/B_hospital"
+        android:layout_toEndOf="@+id/B_hospital"
+        android:onClick="onClick"
+        android:text="resutrants" />
+
+    <Button
+        android:id="@+id/B_school"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/map"
+        android:layout_toEndOf="@+id/B_resturant"
+        android:onClick="onClick"
+        android:text="Schools" />
+
 
 </RelativeLayout>

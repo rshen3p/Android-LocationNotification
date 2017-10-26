@@ -43,6 +43,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Location lastLocation;
     private Marker currentLocationMarker;
     public static final int PERMISSION_REQUEST_LOCATION_CODE = 99;
+    int PROXIMITY_RADIUS = 10000;
+    double latitude,longitude;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,6 +132,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if(client != null){
             LocationServices.FusedLocationApi.removeLocationUpdates(client,this);
         }
+
+        latitude = location.getLatitude();
+        longitude = location.getLongitude();
     }
 
     @Override
@@ -156,7 +161,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return false;
         }
     }
-
+/*
     public void click(View v){
         EditText tf_location = (EditText)findViewById(R.id.TF_location);
         String location = tf_location.getText().toString();
@@ -180,6 +185,125 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mMap.animateCamera((CameraUpdateFactory.newLatLng(latLng)));
             }
         }
+    }
+
+    public void findhospital(View v){
+        mMap.clear();
+        String hospital = "hospita";
+        String url = getUrl(latitude,longitude,hospital);
+        Object dataTransfer[] = new Object[2];
+        dataTransfer[0] = mMap;
+        dataTransfer[1] = url;
+
+        GetNearbyPlacesData getNearbyPlacesData = new GetNearbyPlacesData();
+        getNearbyPlacesData.execute(dataTransfer);
+        Toast.makeText(MapsActivity.this,"Showing nearby hospitals",Toast.LENGTH_SHORT).show();
+    }
+
+    public void findresturant(View v){
+        mMap.clear();
+        String resturant = "resturant";
+        String url = getUrl(latitude,longitude,resturant);
+        Object dataTransfer[] = new Object[2];
+        dataTransfer[0] = mMap;
+        dataTransfer[1] = url;
+
+        GetNearbyPlacesData getNearbyPlacesData = new GetNearbyPlacesData();
+        getNearbyPlacesData.execute(dataTransfer);
+        Toast.makeText(MapsActivity.this,"Showing nearby resturant",Toast.LENGTH_SHORT).show();
+    }
+
+    public void findschool(View v){
+        mMap.clear();
+        String school = "school";
+        String url = getUrl(latitude,longitude,school);
+        Object dataTransfer[] = new Object[2];
+        dataTransfer[0] = mMap;
+        dataTransfer[1] = url;
+
+        GetNearbyPlacesData getNearbyPlacesData = new GetNearbyPlacesData();
+        getNearbyPlacesData.execute(dataTransfer);
+        Toast.makeText(MapsActivity.this,"Showing nearby schools",Toast.LENGTH_SHORT).show();
+    }
+    */
+
+    public void onClick(View v){
+        Object dataTransfer[]=new Object[2];
+        GetNearbyPlacesData getNearbyPlacesData = new GetNearbyPlacesData();
+
+        switch (v.getId()) {
+            case R.id.B_search:
+                EditText tf_location = (EditText) findViewById(R.id.TF_location);
+                String location = tf_location.getText().toString();
+                List<Address> addressList;
+
+                if (!location.equals("")) {
+                    Geocoder geocoder = new Geocoder(this);
+                    try {
+                        addressList = geocoder.getFromLocationName(location, 5);
+
+                        if (addressList != null) {
+                            for (int i = 0; i < addressList.size(); i++) {
+                                LatLng latLng = new LatLng(addressList.get(i).getLatitude(), addressList.get(i).getLongitude());
+                                MarkerOptions markerOptions = new MarkerOptions();
+                                markerOptions.position(latLng);
+                                markerOptions.title(location);
+                                mMap.addMarker(markerOptions);
+                                mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                                mMap.animateCamera(CameraUpdateFactory.zoomTo(10));
+                            }
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                break;
+
+            case R.id.B_hospital:
+                mMap.clear();
+                String hospital = "hospital";
+                String url = getUrl(latitude,longitude,hospital);
+                dataTransfer[0] = mMap;
+                dataTransfer[1] = url;
+
+                getNearbyPlacesData.execute(dataTransfer);
+                Toast.makeText(MapsActivity.this,"Showing nearby hospitals",Toast.LENGTH_SHORT).show();
+                break;
+
+            case R.id.B_resturant:
+                mMap.clear();
+                String restaurant = "restaurant";
+                url = getUrl(latitude,longitude,restaurant);
+                dataTransfer[0] = mMap;
+                dataTransfer[1] = url;
+
+                getNearbyPlacesData.execute(dataTransfer);
+                Toast.makeText(MapsActivity.this,"Showing nearby restaurant",Toast.LENGTH_SHORT).show();
+                break;
+
+
+            case R.id.B_school:
+                mMap.clear();
+                String school = "school";
+                url = getUrl(latitude,longitude,school);
+                dataTransfer[0] = mMap;
+                dataTransfer[1] = url;
+
+                getNearbyPlacesData.execute(dataTransfer);
+                Toast.makeText(MapsActivity.this,"Showing nearby schools",Toast.LENGTH_SHORT).show();
+                break;
+        }
+    }
+
+    private String getUrl(double latitude, double longitude, String nearByPlace){
+        StringBuilder googlePlaceUrl = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
+        googlePlaceUrl.append("location="+latitude+","+longitude);
+        googlePlaceUrl.append("&radius="+PROXIMITY_RADIUS);
+        googlePlaceUrl.append("&type="+nearByPlace);
+        googlePlaceUrl.append("&sensor=true");
+        googlePlaceUrl.append("&key="+"AIzaSyBDuGbhFCCS74Mu8H6kHv--vJM6lQjdCcA");
+
+        return googlePlaceUrl.toString();
     }
 
     @Override
