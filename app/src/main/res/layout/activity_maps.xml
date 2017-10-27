@@ -61,5 +61,15 @@
         android:onClick="onClick"
         android:text="Schools" />
 
+    <Button
+        android:id="@+id/B_to"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="To"
+        android:onClick="onClick"
+        android:layout_alignBaseline="@+id/B_school"
+        android:layout_alignBottom="@+id/B_school"
+        android:layout_toEndOf="@+id/B_school" />
+
 
 </RelativeLayout>

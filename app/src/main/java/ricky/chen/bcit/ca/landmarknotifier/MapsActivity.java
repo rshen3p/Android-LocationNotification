@@ -1,6 +1,7 @@
 package ricky.chen.bcit.ca.landmarknotifier;
 
 import android.Manifest;
+import android.app.NotificationManager;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.location.Address;
@@ -12,9 +13,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -35,7 +38,7 @@ import java.io.IOException;
 import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks
-        , GoogleApiClient.OnConnectionFailedListener, LocationListener {
+        , GoogleApiClient.OnConnectionFailedListener, LocationListener, GoogleMap.OnMarkerClickListener, GoogleMap.OnMarkerDragListener {
 
     private GoogleMap mMap;
     private GoogleApiClient client;
@@ -45,6 +48,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public static final int PERMISSION_REQUEST_LOCATION_CODE = 99;
     int PROXIMITY_RADIUS = 10000;
     double latitude,longitude;
+    double end_latitude,end_longitude;
+    float results[]= new float[10];
+
+    private NotificationCompat.Builder builder;
+    private NotificationManager notificationManager;
+    private int notification_id;
+    private RemoteViews remoteViews;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,7 +107,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
            mMap.setMyLocationEnabled(true);
        }
 
-
+        mMap.setOnMarkerDragListener(this);
+        mMap.setOnMarkerClickListener(this);
     }
 
     protected synchronized void buildGoogleAPIClient(){
@@ -135,6 +146,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         latitude = location.getLatitude();
         longitude = location.getLongitude();
+
+
     }
 
     @Override
@@ -161,71 +174,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return false;
         }
     }
-/*
-    public void click(View v){
-        EditText tf_location = (EditText)findViewById(R.id.TF_location);
-        String location = tf_location.getText().toString();
-        List<Address> addressList = null;
-        MarkerOptions mo = new MarkerOptions();
-
-        if( !location.equals("")) {
-            Geocoder geocoder = new Geocoder(this);
-            try {
-                addressList = geocoder.getFromLocationName(location,5);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            for(int i= 0; i<addressList.size();i++){
-                Address myAdress = addressList.get(i);
-                LatLng latLng = new LatLng(myAdress.getLatitude(),myAdress.getLongitude());
-                mo.position(latLng);
-                mo.title("Your search result");
-                mMap.addMarker(mo);
-                mMap.animateCamera((CameraUpdateFactory.newLatLng(latLng)));
-            }
-        }
-    }
-
-    public void findhospital(View v){
-        mMap.clear();
-        String hospital = "hospita";
-        String url = getUrl(latitude,longitude,hospital);
-        Object dataTransfer[] = new Object[2];
-        dataTransfer[0] = mMap;
-        dataTransfer[1] = url;
-
-        GetNearbyPlacesData getNearbyPlacesData = new GetNearbyPlacesData();
-        getNearbyPlacesData.execute(dataTransfer);
-        Toast.makeText(MapsActivity.this,"Showing nearby hospitals",Toast.LENGTH_SHORT).show();
-    }
-
-    public void findresturant(View v){
-        mMap.clear();
-        String resturant = "resturant";
-        String url = getUrl(latitude,longitude,resturant);
-        Object dataTransfer[] = new Object[2];
-        dataTransfer[0] = mMap;
-        dataTransfer[1] = url;
-
-        GetNearbyPlacesData getNearbyPlacesData = new GetNearbyPlacesData();
-        getNearbyPlacesData.execute(dataTransfer);
-        Toast.makeText(MapsActivity.this,"Showing nearby resturant",Toast.LENGTH_SHORT).show();
-    }
-
-    public void findschool(View v){
-        mMap.clear();
-        String school = "school";
-        String url = getUrl(latitude,longitude,school);
-        Object dataTransfer[] = new Object[2];
-        dataTransfer[0] = mMap;
-        dataTransfer[1] = url;
-
-        GetNearbyPlacesData getNearbyPlacesData = new GetNearbyPlacesData();
-        getNearbyPlacesData.execute(dataTransfer);
-        Toast.makeText(MapsActivity.this,"Showing nearby schools",Toast.LENGTH_SHORT).show();
-    }
-    */
 
     public void onClick(View v){
         Object dataTransfer[]=new Object[2];
@@ -292,6 +240,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 getNearbyPlacesData.execute(dataTransfer);
                 Toast.makeText(MapsActivity.this,"Showing nearby schools",Toast.LENGTH_SHORT).show();
                 break;
+
+            case R.id.B_to:
+                mMap.clear();
+                MarkerOptions mo = new MarkerOptions();
+                mo.position(new LatLng(end_latitude,end_longitude));
+                mo.title("Destination");
+
+                Location.distanceBetween(latitude,longitude,end_latitude,end_longitude,results);
+                Toast.makeText(this,"Distance = "+results[0],Toast.LENGTH_SHORT).show();
+                mo.snippet("Distance = "+results[0]);
+                mMap.addMarker(mo);
+                mo.draggable(true);
+                break;
         }
     }
 
@@ -314,5 +275,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        marker.setDraggable(true);
+        return false;
+    }
+
+    @Override
+    public void onMarkerDragStart(Marker marker) {
+
+    }
+
+    @Override
+    public void onMarkerDrag(Marker marker) {
+
+    }
+
+    @Override
+    public void onMarkerDragEnd(Marker marker) {
+        end_latitude = marker.getPosition().latitude;
+        end_longitude = marker.getPosition().longitude;
     }
 }
