@@ -2,6 +2,9 @@ package ricky.chen.bcit.ca.landmarknotifier;
 
 import android.Manifest;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.location.Address;
@@ -51,15 +54,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     double end_latitude,end_longitude;
     float results[]= new float[10];
 
-    private NotificationCompat.Builder builder;
+    private NotificationCompat.Builder notification;
     private NotificationManager notificationManager;
-    private int notification_id;
-    private RemoteViews remoteViews;
+    private static final int notification_id = 45612;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        notification = new NotificationCompat.Builder(this);
+        notification.setAutoCancel(true);
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
             checkLocationPermission();
@@ -68,6 +73,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
     }
 
     @Override
@@ -148,6 +154,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         longitude = location.getLongitude();
 
 
+        Location.distanceBetween(latitude,longitude,49.283349, -123.115059,results);
+        if(results[0] < 1000){
+            //Build the notification
+            notification.setSmallIcon(R.mipmap.ic_launcher);
+            notification.setTicker("This is the ticker");
+            notification.setWhen(System.currentTimeMillis());
+            notification.setContentTitle("Proximity Alert");
+            notification.setContentText("You are only "+Math.round(results[0])+" meters away from BCIT DT!");
+
+            Intent intent = new Intent(this,MapsActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
+            notification.setContentIntent(pendingIntent);
+
+            //issue notification
+            notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            notificationManager.notify(notification_id,notification.build());
+        }
     }
 
     @Override
